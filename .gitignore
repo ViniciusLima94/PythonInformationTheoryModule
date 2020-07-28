@@ -1,0 +1,12 @@
+*.dat
+*.npy
+*.txt
+*.out
+*.err
+*.pdf
+*.png
+*.svg
+kernel_test.py
+/__pycache__
+/out
+/err
