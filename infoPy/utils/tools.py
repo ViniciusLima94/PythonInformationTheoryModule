@@ -15,6 +15,13 @@ def normalize_data(x):
 	#####################################################################################################
 	from sklearn.preprocessing import StandardScaler
 
+	# Checking data shape
+	if x.shape[0] >= 1:
+		x = x.T
+	if len(x.shape) == 1:
+		x = x[np.newaxis, :].T
+
+
 	# Instantiate scaler object
 	scaler = StandardScaler()
 	# Fit on data

@@ -1,5 +1,5 @@
 '''
-	Python module to compute information theoretical quantities
+Python module to compute information theoretical quantities
 '''
 
 import numpy             as     np
@@ -8,7 +8,7 @@ from   ..utils.tools      import *
 #from   jpype             import *
 from   ..general.measures import EntropyFromDataProbabilities
 
-def KernelEstimatorEntropy(x, bandwidth = 0.3, kernel = 'tophat', metric = 'euclidean', algorithm = 'auto', norm = False):
+def KernelEstimatorEntropy(x, bandwidth = 0.3, kernel = 'tophat', metric = 'euclidean', algorithm = 'auto'):
 	#####################################################################################################
 	# Description: Computes the entropy of continuous time series 
 	# > Inputs:
@@ -21,18 +21,13 @@ def KernelEstimatorEntropy(x, bandwidth = 0.3, kernel = 'tophat', metric = 'eucl
 	# H: Entropy of x if N_variables = 1, joint entropy if N_variables > 1
 	#####################################################################################################
 
-
-	# Normalizing data
-	if norm == True:
-		x = normalize_data(x)
-
 	prob  = KernelDensityEstimator(x, bandwidth, kernel, metric, algorithm)
 
 	H     = EntropyFromDataProbabilities(prob)
 
 	return H
 
-def KernelEstimatorMutualInformation(x, bandwidth = 0.3, kernel = 'tophat', metric = 'euclidean', algorithm = 'auto', norm = False):
+def KernelEstimatorMutualInformation(x, bandwidth = 0.3, kernel = 'tophat', metric = 'euclidean', algorithm = 'auto'):
 	#####################################################################################################
 	# Description: Computes the mutual information between continuous variables
 	# > Inputs:
@@ -55,17 +50,17 @@ def KernelEstimatorMutualInformation(x, bandwidth = 0.3, kernel = 'tophat', metr
 	# Compute the entropy of each variable
 	H = np.zeros(N_var)
 	for i in range(N_var):
-		H[i] = KernelEstimatorEntropy(x[i], bandwidth, kernel, metric, algorithm,  norm)
+		H[i] = KernelEstimatorEntropy(x[i], bandwidth, kernel, metric, algorithm)
 
 	# Compute the joint entropy
-	H_joint = KernelEstimatorEntropy(x, bandwidth, kernel, metric, algorithm, norm)
+	H_joint = KernelEstimatorEntropy(x, bandwidth, kernel, metric, algorithm)
 
 	# Compute the mutual information
 	MI = np.sum(H) - H_joint
 
 	return MI
 
-def KernelEstimatorLaggedMutualInformation(x, y, bandwidth = 0.3, kernel = 'tophat', metric = 'euclidean', lag = 0, algorithm = 'auto',  norm = False):
+def KernelEstimatorLaggedMutualInformation(x, y, bandwidth = 0.3, kernel = 'tophat', metric = 'euclidean', lag = 0, algorithm = 'auto'):
 	#####################################################################################################
 	# Description: Computes the mutual lagged information between two continuous variables
 	# > Inputs:
@@ -82,14 +77,14 @@ def KernelEstimatorLaggedMutualInformation(x, y, bandwidth = 0.3, kernel = 'toph
 
 	# If lag is zero then compute the regular bicariate MI 
 	if lag == 0:
-		return KernelEstimatorMutualInformation(np.vstack([x,y]), bandwidth, kernel, metric, algorithm, norm)
+		return KernelEstimatorMutualInformation(np.vstack([x,y]), bandwidth, kernel, metric, algorithm)
 	else:
 		# Otherwise we apply the lag to y
 		x = x[lag:]
 		y = y[0:-lag]
-	return KernelEstimatorMutualInformation(np.vstack([x,y]), bandwidth, kernel, metric, algorithm, norm)
+	return KernelEstimatorMutualInformation(np.vstack([x,y]), bandwidth, kernel, metric, algorithm)
 
-def KernelEstimatorConditionalMutualInformation(x, y, z, bandwidth = 0.3, kernel = 'tophat', metric = 'euclidean', algorithm = 'auto', norm = False):
+def KernelEstimatorConditionalMutualInformation(x, y, z, bandwidth = 0.3, kernel = 'tophat', metric = 'euclidean', algorithm = 'auto'):
 	#####################################################################################################
 	# Description: Computes the conditional mutual information between two continuous variables conditioned
 	# to a third one.
@@ -105,12 +100,12 @@ def KernelEstimatorConditionalMutualInformation(x, y, z, bandwidth = 0.3, kernel
 	# cMI: The mutual information between x and y conditioned to z.
 	#####################################################################################################
 
-	cMI = KernelEstimatorMutualInformation(np.vstack([x,y,z]), bandwidth, kernel, metric, algorithm, norm) - \
-		  KernelEstimatorMutualInformation(np.vstack([x,z]), bandwidth, kernel, metric, algorithm, norm ) 
+	cMI = KernelEstimatorMutualInformation(np.vstack([x,y,z]), bandwidth, kernel, metric, algorithm) - \
+		  KernelEstimatorMutualInformation(np.vstack([x,z]), bandwidth, kernel, metric, algorithm ) 
 
 	return cMI
 
-def KernelEstimatorTransferEntropy(x, y, bandwidth = 0.3, kernel = 'tophat', metric = 'euclidean', lag = 0, algorithm = 'auto', norm = False):
+def KernelEstimatorTransferEntropy(x, y, bandwidth = 0.3, kernel = 'tophat', metric = 'euclidean', lag = 0, algorithm = 'auto'):
 	#####################################################################################################
 	# Description: Computes the transfer entropy between two continuous variables
 	# to a third one.
@@ -132,6 +127,6 @@ def KernelEstimatorTransferEntropy(x, y, bandwidth = 0.3, kernel = 'tophat', met
 	x_l = x[0:-(1+lag)].copy()	   # lagged y
 	
 	# Computing TE x->y
-	TE_xy = KernelEstimatorConditionalMutualInformation(y_c, x_l, y_l, bandwidth, kernel, metric, algorithm, norm)
+	TE_xy = KernelEstimatorConditionalMutualInformation(y_c, x_l, y_l, bandwidth, kernel, metric, algorithm)
 
 	return TE_xy
